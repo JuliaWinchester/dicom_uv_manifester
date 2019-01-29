@@ -1,7 +1,7 @@
 from json 	 import dump
 from math    import ceil
 from os      import listdir
-from os.path import isfile, join
+from os.path import basename, normpath, isfile, join
 from sys     import argv
 
 # Take in a directory name of .dcm files and export the desired number of manifest files, with options being an integer or 'log'
@@ -21,12 +21,20 @@ def gen_manifest(html_dir, slice_list):
 	return { 'baseurl': html_dir, 'series': slice_list }
 
 if __name__ == '__main__':
-	input_dir, html_dir, split, num, file = argv[1:]
-	
-	slice_list = gen_slice_list(input_dir, split=split, num=float(num))
-	print(len(slice_list))
-	manifest_dict = gen_manifest(html_dir, slice_list)
+	input_dir, out_dir, html_dir = argv[1:]
+	split = 'by_slice_num'
+	slice_sets = [20, 50, 100, 200, 300, 400, 500]
 
-	with open(file, 'w') as write_file:
-		dump(manifest_dict, write_file)
+	for num in slice_sets:
+		slice_list = gen_slice_list(input_dir, split=split, num=float(num))
+		print(len(slice_list))
+		manifest_dict = gen_manifest(html_dir, slice_list)
+		file = join(out_dir, basename(normpath(input_dir)) + "_" + str(num) + "_slices.json")
+		with open(file, 'w') as write_file:
+			dump(manifest_dict, write_file)
+
+
+	
+
+
 
